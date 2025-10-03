@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex flex-column h-100">
+  <h3 class="p-2" style="background-color:#cfe5cf; color:#000; border-radius:4px;">
+    BOOK DETAILS
+  </h3>
+  <div class="card shadow mb-3">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-12 col-md-4 mb-3 text-center">
+          <img src="{{ book.url }}" class="img-fluid" alt="{{ book.title }}">
+        </div>
+        <div class="col-12 col-md-8">
+          <h3>{{ book.title }}<br>By: {{ book.authors|join(", ") }}</h3>
+          <p class="mb-1">Category: {{ book.category }}{% if book.genres %}, {{ book.genres|join(", ") }}{% endif %}</p>
+          <p class="mb-1">Pages: {{ book.pages }}</p>
+          <p class="mb-1">Copies: <strong>{{ book.copies }}</strong> Available: <strong>{{ book.available }}</strong></p>
+          
+          {% for para in book.description %}
+            <p>{{ para }}</p>
+          {% endfor %}
+        </div>
+      </div>
+        <div class="d-flex justify-content-end">
+          <a href="/" class="btn btn-success">Back to Book Titles</a>
+        </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
