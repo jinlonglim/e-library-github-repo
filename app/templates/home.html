@@ -59,6 +59,9 @@
             <p>{{ book.description[0] }}</p>
             <p>{{ book.description[-1] }}</p>
             <div class="mt-auto text-end">
+              {% if book.available > 0 %}
+                <a href="{{ url_for('make_loan', title=book.title) }}" class="btn btn-success btn-sm">Make a Loan</a>
+              {% endif %}
               <a href="{{ url_for('details', title=book.title) }}" class="btn btn-success btn-sm">More details</a>
           </div>
         </div>

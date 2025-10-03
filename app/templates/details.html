@@ -3,7 +3,6 @@
 {% block page_title_mobile %}BOOK DETAILS{% endblock %}
 {% block content %}
 <div class="d-flex flex-column h-100">
-
   <div class="card shadow mb-3">
     <div class="card-body">
       <div class="row">
@@ -21,8 +20,13 @@
           {% endfor %}
         </div>
       </div>
-        <div class="d-flex justify-content-end">
+        <div class="d-flex justify-content-end gap-2 mt-3">
           <a href="/" class="btn btn-success">Back to Book Titles</a>
+          {% if book.available == 0 %}
+            <button class="btn btn-danger">Not Available</button>
+          {% else %}
+            <a href="{{ url_for('make_loan', title=book.title) }}" class="btn btn-success">Make a Loan</a>
+          {% endif %}
         </div>
     </div>
   </div>

@@ -137,6 +137,19 @@ class Book(db.Document):
         min_value=1,
     )
 
+    def loan_book(self):
+        if self.available > 0:
+            self.available -= 1
+            self.save()
+            return True
+        return False
+    
+    def return_book(self):
+        if self.available < self.copies:
+            self.available += 1
+            self.save()
+            return True
+        return False
     #static method has access to nothing so no need define instance, self
     #can just call class name directly
 
@@ -210,6 +223,93 @@ class User(db.Document, UserMixin):
         if user and user.password_hash == password_hash:
             return user
         return None
+              
+class Loan(db.Document):
+    meta = {
+        'collection': 'loans',
+    }
+    member = db.ReferenceField(User, required=True)
+    book = db.ReferenceField(Book, required=True)
+    borrow_date = db.DateTimeField(required=True)
+    return_date = db.DateTimeField()
+    due_date = db.DateTimeField(required=True)
+    renew_count = db.IntField(default=0)
+    
+    @staticmethod
+    def create_loan(member, book):
+        # Check if member already has unreturned loan for this book
+        existing = Loan.objects(member=member, book=book, return_date=None).first()
+        if existing:
+            return None
+        
+        if book.available > 0:
+            # Generate random borrow date 10-20 days before today
+            days_ago = random.randint(10, 20)
+            borrow_date = datetime.now() - timedelta(days=days_ago)
+            due_date = borrow_date + timedelta(days=14)
+
+            loan = Loan(member=member, book=book, borrow_date=borrow_date, due_date=due_date)
+            loan.save()
+            book.loan_book()
+            return loan
+        return None
+    
+    @staticmethod
+    def get_user_loans(member):
+        return Loan.objects(member=member).order_by('-borrow_date')
+
+    @staticmethod
+    def get_loan_by_id(loan_id):
+        return Loan.objects(id=loan_id).first()
+    
+    def renew_loan(self):
+        if self.renew_count < 2 and not self.is_overdue():
+            # Generate new borrow date 10-20 days after current
+            days_forward = random.randint(10, 20)
+            new_borrow_date = self.borrow_date + timedelta(days=days_forward)
+            
+            # Cannot be later than today
+            if new_borrow_date > datetime.now():
+                new_borrow_date = datetime.now()
+            
+            self.borrow_date = new_borrow_date
+            self.due_date = new_borrow_date + timedelta(days=14)
+            self.renew_count += 1
+            self.save()
+            return True
+        return False
+    
+    def return_loan(self):
+        if not self.return_date:
+            # Generate return date 10-20 days after borrow date
+            days_forward = random.randint(10, 20)
+            return_date = self.borrow_date + timedelta(days=days_forward)
+            
+            # Cannot be later than today
+            if return_date > datetime.now():
+                return_date = datetime.now()
+            
+            self.return_date = return_date
+            self.save()
+            self.book.return_book()
+            return True
+        return False
+    
+    def delete_loan(self):
+        if self.return_date:
+            self.delete()
+            return True
+        return False
+    
+    def is_overdue(self):
+        return datetime.now() > self.due_date and not self.return_date
+    
+    def can_renew(self):
+        return self.renew_count < 2 and not self.is_overdue() and not self.return_date
+    
+    def can_return(self):
+        return not self.return_date
+
 
 #used by flask-login to reload the user object from the user stored in the session
 #check if valid user, if valid return user object

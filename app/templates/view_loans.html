@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block page_title %}CURRENT LOANS{% endblock %}
+{% block page_title_mobile %}CURRENT LOANS{% endblock %}
+{% block content %}
+
+{% if loans|length == 0 %}
+<p class="fs-4">No loan currently</p>
+{% else %}
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Title/Author</th>
+        <th>Due Date</th>
+        <th>Return Date</th>
+        <th>Renew Count</th>
+        <th></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for loan in loans %}
+      <tr>
+        <td><img src="{{ loan.book.url }}" class="img-fluid" style="max-width: 50px; height: auto;">
+          <br>{{ loan.book.title }}
+          <br>By: {{ loan.book.authors|join(", ") }}</td>
+        <!-- Display due date in 19 Aug 2025 format -->
+        <td>{{ loan.due_date.strftime('%d %b %Y') }}</td>
+        <td>
+          {% if loan.return_date %}
+            {{ loan.return_date.strftime('%Y-%m-%d') }}
+          {% else %}
+          <!--Not returned yet show empty-->
+          <br>
+          {% endif %}
+        </td>
+        <td>{{ loan.renew_count }}</td>
+        <td>
+          {% if loan.return_date %}
+            <a href="{{ url_for('delete_loan', loan_id=loan.id) }}" class="btn btn-sm btn-danger">Delete</a>
+          {% elif loan.is_overdue() or loan.renew_count >= 2 %}
+            <a href="{{ url_for('return_loan', loan_id=loan.id) }}" class="btn btn-sm btn-success">Return</a>
+          {% else %}
+            <a href="{{ url_for('return_loan', loan_id=loan.id) }}" class="btn btn-sm btn-success">Return</a>
+            <a href="{{ url_for('renew_loan', loan_id=loan.id) }}" class="btn btn-sm btn-success">Renew</a>
+
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,5 +1,5 @@
 from flask import Flask, render_template, flash, request, session, redirect, url_for
-from app.model import LoginForm, RegForm, Book, User, AddBookForm
+from app.model import LoginForm, RegForm, Book, User, AddBookForm, Loan
 from datetime import datetime
 from app import app, db, login_manager
 from flask_login import login_user, logout_user, login_required, current_user
@@ -73,6 +73,77 @@ def add_book():
         return redirect(url_for('add_book'))
     return render_template('add_book.html', form=form)
 
+#view loans for non-admin user
+@app.route("/make_loan/<title>")
+@login_required
+def make_loan(title):
+    # Check if non-admin user
+    if current_user.email == 'admin@lib.sg':
+        flash("Admin users cannot make loans.", "danger")
+        return redirect(url_for('details', title=title))
+    
+    book = Book.objects(title=title).first()
+    if not book:
+        flash("Book not found.", "danger")
+        return redirect(url_for('home'))
+    
+    loan = Loan.create_loan(current_user, book)
+    if loan:
+        flash(f"You have successfully loaned '{book.title}'.", "success")
+    else:
+        flash("Cannot make loan. Book unavailable or you already have an unreturned loan for this book.", "danger")
+    
+    return redirect(url_for('details', title=title))
+
+@app.route("/view_loans")
+@login_required
+def view_loans():
+    if current_user.email == 'admin@lib.sg':
+        flash("Admin users do not have loans.", "info")
+        return redirect(url_for('home'))
+    
+    loans = Loan.get_user_loans(current_user)
+    return render_template('view_loans.html', loans=loans)
+
+@app.route("/renew_loan/<loan_id>")
+@login_required
+def renew_loan(loan_id):
+    loan = Loan.get_loan_by_id(loan_id)
+    if loan and loan.member == current_user:
+        if loan.renew_loan():
+            flash("Loan renewed successfully!", "success")
+        else:
+            flash("Cannot renew loan. Maximum renewals reached or loan is overdue.", "danger")
+    else:
+        flash("Loan not found.", "danger")
+    return redirect(url_for('view_loans'))
+
+@app.route("/return_loan/<loan_id>")
+@login_required
+def return_loan(loan_id):
+    loan = Loan.get_loan_by_id(loan_id)
+    if loan and loan.member == current_user:
+        if loan.return_loan():
+            flash("Book returned successfully!", "success")
+        else:
+            flash("Cannot return loan.", "danger")
+    else:
+        flash("Loan not found.", "danger")
+    return redirect(url_for('view_loans'))
+
+@app.route("/delete_loan/<loan_id>")
+@login_required
+def delete_loan(loan_id):
+    loan = Loan.get_loan_by_id(loan_id)
+    if loan and loan.member == current_user:
+        if loan.delete_loan():
+            flash("Loan record deleted!", "success")
+        else:
+            flash("Cannot delete loan. Loan must be returned first.", "danger")
+    else:
+        flash("Loan not found.", "danger")
+    return redirect(url_for('view_loans'))
+
 
 @app.route("/logout")
 @login_required
@@ -122,7 +193,6 @@ def register():
             flash("Registration failed. User may already exist.", "danger")
         return redirect(url_for("login")) #redirect to function login after registration
     return render_template("register.html", form=form)
-
 
 if __name__ == '__main__':
     app.run()
