@@ -1,33 +1,12 @@
-{% from "_render_field.html" import render_field %}
-{% extends "base.html" %}
-{% block page_title %}REGISTER{% endblock %}
-{% block page_title_mobile %}REGISTER{% endblock %}
-{% block content %}
-<div class="col-xl-6 col-sm-4 p-2">
-  <div class="card card-common">
-    <div class="card-header">
-      <h2>Register</h2>
-    </div>
-    <div class="card-body">
-      {% with messages = get_flashed_messages() %}
-      {% if messages %}
-      <ul class=flashes>
-        {% for message in messages %}
-        <li style="color:red;">{{ message }}</li>
+{% macro render_field(field) %}
+
+<div class="form-group">
+    <label for="{{ field.name }} "><h3>{{ field.label.text.capitalize() }}</h3></label>
+    {{ field(class_='form-control', **kwargs)|safe }}
+    <ul> 
+        {% for error in field.errors %}
+        <li style="color:red;">{{ error }}</li>
         {% endfor %}
-      </ul>
-      {% endif %}
-      {% endwith %}
-      <form action="/register" method="post">
-        {{ render_field(form.email, type="email", placeholder="Enter email", id="email") }}
-        {{ render_field(form.password, type="password", placeholder="Enter password", id="pwd") }}
-        {{ render_field(form.name, type="name", id="name") }}
-        {{ form.hidden_tag() }}
-        <div class="d-flex justify-content-end">
-          <button type="submit" class="btn btn-success" value="login">Submit</button>
-        </div>
-      </form>
-    </div>
-  </div>
+    </ul>
 </div>
-{% endblock %}
+{% endmacro %}
