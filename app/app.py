@@ -1,5 +1,5 @@
 from flask import Flask, render_template, flash, request, session, redirect, url_for
-from app.model import LoginForm, RegForm, Book, User, AddBookForm, Loan
+from app.model import LoginForm, RegForm, Book, User, AddBookForm
 from datetime import datetime
 from app import app, db, login_manager
 from flask_login import login_user, logout_user, login_required, current_user

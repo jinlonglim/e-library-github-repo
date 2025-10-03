@@ -3,7 +3,6 @@
 {% block page_title_mobile %}BOOK TITLES{% endblock %}
 {% block content %}
 <div class="mb-4">
-
   <div class="p-2" style="background-color:#e6f2e6; border-radius:4px; color:#4CAF50; font-weight:500;">
     
     <div class="d-none d-md-flex align-items-center justify-content-between">
@@ -61,7 +60,6 @@
             <p>{{ book.description[-1] }}</p>
             <div class="mt-auto text-end">
               <a href="{{ url_for('details', title=book.title) }}" class="btn btn-success btn-sm">More details</a>
-            </div>
           </div>
         </div>
       </div>

@@ -210,7 +210,6 @@ class User(db.Document, UserMixin):
         if user and user.password_hash == password_hash:
             return user
         return None
-              
 
 #used by flask-login to reload the user object from the user stored in the session
 #check if valid user, if valid return user object

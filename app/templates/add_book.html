@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block page_title %}ADD A BOOK{% endblock %}
+{% block page_title_mobile %}ADD A BOOK{% endblock %}
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="border rounded shadow p-4">
+        <form method="POST">
+          {{ form.csrf_token }}
+          {{ form.hidden_tag() }}
+
+          <div class="row mb-3">
+            <label class="col-sm-3 col-form-label"><strong>Choose multiple Genres:</strong></label>
+            <div class="col-sm-9">
+              {{ form.genres(class="form-select", size="4", multiple=True) }}
+            </div>
+          </div>
+          
+          <div class="row mb-3">
+            <label class="col-sm-3 col-form-label"><strong>Title:</strong></label>
+            <div class="col-sm-9">
+              {{ form.title(class="form-control") }}
+            </div>
+          </div>
+          
+          <div class="row mb-3">
+            <label class="col-sm-3 col-form-label"><strong>Choose a category:</strong></label>
+            <div class="col-sm-9">
+              {{ form.category(class="form-select") }}
+            </div>
+          </div>
+          
+          <div class="row mb-2">
+            <label class="col-sm-3 col-form-label"><strong>URL for Cover:</strong></label>
+            <div class="col-sm-9">
+              {{ form.url(class="form-control") }}
+            </div>
+          </div>
+
+          <div class="row mb-2">
+            <label class="col-sm-3 col-form-label"><strong>Description:</strong></label>
+            <div class="col-sm-9">
+              {{ form.description(class="form-control", rows="8") }}
+            </div>
+          </div>
+          
+          <div class="row mb-2">
+            <label class="col-sm-3 col-form-label"><strong>Author 1: <span class="text-danger">*</span></strong></label>
+            <div class="col-sm-9">
+              <div class="d-flex align-items-center gap-2">
+                {{ form.author(class="form-control") }}
+                <div class="form-check">
+                  {{ form.illustrator1(class="form-check-input") }}
+                  <label class="form-check-label" for="illustrator1">Illustrator</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row mb-2">
+            <label class="col-sm-3 col-form-label"><strong>Author 2:</strong></label>
+            <div class="col-sm-9">
+              <div class="d-flex align-items-center gap-2">
+                {{ form.author2(class="form-control") }}
+                <div class="form-check">
+                  {{ form.illustrator2(class="form-check-input") }}
+                  <label class="form-check-label" for="illustrator2">Illustrator</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row mb-2">
+            <label class="col-sm-3 col-form-label"><strong>Author 3:</strong></label>
+            <div class="col-sm-9">
+              <div class="d-flex align-items-center gap-2">
+                {{ form.author3(class="form-control") }}
+                <div class="form-check">
+                  {{ form.illustrator3(class="form-check-input") }}
+                  <label class="form-check-label" for="illustrator3">Illustrator</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row mb-2">
+            <label class="col-sm-3 col-form-label"><strong>Author 4:</strong></label>
+            <div class="col-sm-9">
+              <div class="d-flex align-items-center gap-2">
+                {{ form.author4(class="form-control") }}
+                <div class="form-check">
+                  {{ form.illustrator4(class="form-check-input") }}
+                  <label class="form-check-label" for="illustrator4">Illustrator</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row mb-2">
+            <label class="col-sm-3 col-form-label"><strong>Author 5:</strong></label>
+            <div class="col-sm-9">
+              <div class="d-flex align-items-center gap-2">
+                {{ form.author5(class="form-control") }}
+                <div class="form-check">
+                  {{ form.illustrator5(class="form-check-input") }}
+                  <label class="form-check-label" for="illustrator5">Illustrator</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row mb-3">
+            <label class="col-sm-3 col-form-label"><strong>Number of pages:</strong></label>
+            <div class="col-sm-9">
+              {{ form.pages(class="form-control", type="number") }}
+            </div>
+          </div>
+          
+          <div class="row mb-3">
+            <label class="col-sm-3 col-form-label"><strong>Number of copies:</strong></label>
+            <div class="col-sm-9">
+              {{ form.copies(class="form-control", type="number") }}
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-sm-9 offset-sm-3 text-end">
+              <button type="submit" class="btn btn-success">Submit</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

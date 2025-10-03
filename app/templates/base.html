@@ -129,7 +129,20 @@
                 <i class="fa-solid fa-id-card me-2"></i>Book Titles
               </a>
             </li>
-
+            {% if current_user.is_authenticated and current_user.email == 'admin@lib.sg' %}
+            <li class="nav-item">
+              <a href="/add_book" class="nav-link">
+                <i class="fa-solid fa-cloud-arrow-up me-2"></i>New Book
+              </a>
+            </li>
+            {% endif %}
+            {% if current_user.is_authenticated and current_user.email != 'admin@lib.sg' %}
+            <li class="nav-item">
+              <a href="/view_loans" class="nav-link">
+                <i class="fa-solid fa-clipboard me-2"></i>View Loans
+              </a>
+            </li>
+            {% endif %}
             {% if not current_user.is_authenticated %}
             <li class="nav-item">
               <a href="/login" class="nav-link">
@@ -175,6 +188,20 @@
             <i class="fa-solid fa-id-card me-2"></i>Book Titles
           </a>
         </li>
+        {% if current_user.is_authenticated and current_user.email == 'admin@lib.sg' %}
+        <li class="nav-item">
+          <a href="/add_book" class="nav-link">
+            <i class="fa-solid fa-cloud-arrow-up me-2"></i>New Book
+          </a>
+        </li>
+        {% endif %}
+        {% if current_user.is_authenticated and current_user.email != 'admin@lib.sg' %}
+        <li class="nav-item">
+          <a href="/view_loans" class="nav-link">
+            <i class="fa-solid fa-clipboard me-2"></i>View Loans
+          </a>
+        </li>
+        {% endif %}
             
         {% if not current_user.is_authenticated %}
         <li class="nav-item"><a href="/login" class="nav-link"><i class="fa-solid fa-right-to-bracket me-2"></i>Login</a></li>
