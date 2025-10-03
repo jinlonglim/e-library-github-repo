@@ -20,6 +20,54 @@
     }
     .sidebar .nav-link { color: #fff; font-weight: 500; }
     
+    /* Page header with responsive behavior */
+    .page-header {
+      position: relative;
+      background-color: #cfe5cf;
+      color: #000;
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .logout-icon {
+      position: absolute;
+      top: 50%;
+      right: 1rem;
+      transform: translateY(-50%);
+      color: #333;
+      font-size: 1.5rem;
+      text-decoration: none;
+    }
+    
+    .logout-icon:hover {
+      color: #000;
+    }
+    
+    /* Mobile-specific styles for page header */
+    @media (max-width: 767.98px) {
+      .page-header.desktop-only {
+        display: none;
+      }
+      
+      .page-header.mobile-only {
+        border-radius: 0;
+        margin-bottom: 0;
+        text-align: left;
+      }
+      
+      .page-header.mobile-only h3 {
+        font-size: 1.25rem;
+      }
+    }
+    
+    /* Hide mobile header on desktop */
+    @media (min-width: 768px) {
+      .page-header.mobile-only {
+        display: none;
+      }
+    }
+    
     #menu-toggle { display: none; }
 
     .mobile-menu-container {
@@ -68,27 +116,94 @@
       <div class="mobile-menu-container">
         <div class="mobile-menu">
           <h4>SG Library</h4>
-          <hr>
+          
+          {% if current_user.is_authenticated %}
+          <div class="d-flex align-items-center py-3 border-top border-bottom ps-3" style="max-width: 95%; margin: auto;">
+            <img src="{{ url_for('static', filename='assets/admin.jpeg')}}" width="70" class="rounded-circle me-2">
+            <div class="text-white ">{{ current_user.name }}</div>
+          </div>
+          {% endif %}
           <ul class="navbar-nav w-100">
             <li class="nav-item">
               <a href="/" class="nav-link">
                 <i class="fa-solid fa-id-card me-2"></i>Book Titles
               </a>
             </li>
+
+            {% if not current_user.is_authenticated %}
+            <li class="nav-item">
+              <a href="/login" class="nav-link">
+                <i class="fa-solid fa-right-to-bracket me-2"></i>Login
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/register" class="nav-link">
+                <i class="fa-solid fa-user-plus me-2"></i>Register
+              </a>
+            </li>
+            {% endif %}
           </ul>
+          
+          <!-- small screen page header syncs with desktop title -->
+          <div class="page-header mobile-only">
+            <h3 id="mobile-page-title">{% block page_title_mobile %}BOOK TITLES{% endblock %}</h3>
+            {% if current_user.is_authenticated %}
+            <a href="/logout" class="logout-icon" title="Logout">
+              <i class="fa-solid fa-right-from-bracket"></i>
+            </a>
+            {% endif %}
+          </div>
         </div>
       </div>
     </nav>
 
-    <nav class="col-md-2 d-none d-md-block sidebar shadow">
+    <nav class="col-md-2 d-none d-md-block sidebar shadow position-relative">
       <h4 class="text-center mb-3">SG Library</h4>
-      <hr>
+      
+      <!-- UPDATED: User profile with borders on top and bottom -->
+      {% if current_user.is_authenticated %}
+      <div class="d-flex align-items-center py-3 border-top border-bottom ps-3" style="max-width: 95%; margin: auto;">
+        <img src="{{ url_for('static', filename='assets/admin.jpeg')}}" width="50" class="rounded-circle me-2">
+        <div class="text-white ">{{ current_user.name }}</div>
+      </div>
+      {% endif %}
+
+      
       <ul class="nav flex-column">
-        <li class="nav-item"><a href="/" class="nav-link"><i class="fa-solid fa-id-card me-2"></i>Book Titles</a></li>
+        <li class="nav-item">
+          <a href="/" class="nav-link">
+            <i class="fa-solid fa-id-card me-2"></i>Book Titles
+          </a>
+        </li>
+            
+        {% if not current_user.is_authenticated %}
+        <li class="nav-item"><a href="/login" class="nav-link"><i class="fa-solid fa-right-to-bracket me-2"></i>Login</a></li>
+        <li class="nav-item"><a href="/register" class="nav-link"><i class="fa-solid fa-user-plus me-2"></i>Register</a></li>
+        {% endif %}
       </ul>
     </nav>
 
     <main class="col-md-10 ml-sm-auto px-4 py-4">
+      <!-- shows up in desktop only -->
+      <div class="page-header desktop-only">
+        <h3>{% block page_title %}BOOK TITLES{% endblock %}</h3>
+        {% if current_user.is_authenticated %}
+        <a href="/logout" class="logout-icon" title="Logout">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </a>
+        {% endif %}
+      </div>
+      
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" role="alert">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      
       {% block content %}{% endblock %}
     </main>
   </div>
