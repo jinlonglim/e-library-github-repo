@@ -27,13 +27,57 @@ def details(title):
     book = next((book for book in all_books if book['title'] == title), None)
     return render_template('details.html', book=book)
 
-if __name__ == '__main__':
-    app.run()
+
 
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
     flash("You have been logged out.", "info")
-    return redirect(url_for("shop"))
+    return redirect(url_for("home"))
 
+
+# create a route for login page
+@app.route("/login", methods=["GET", "POST"])
+#function for login
+def login():
+    form = LoginForm()
+    #display the login form
+    if request.method == "GET":
+        return render_template("login.html", form=form)
+    else:
+        #process the login form
+        email = request.form["email"]
+        password = request.form["password"]
+        user = User.get_user_credentials(email, password) #check if valid user
+        if user:
+            login_user(user, remember=form.remember_me.data)  #login the user
+            flash("Login successful!", "success")
+            return redirect(url_for("home")) #redirect to function home after login
+        else:
+            flash("Invalid email or password", "danger")
+            return redirect(url_for("login")) #redirect to function login
+        
+# create route for registration page
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    form = RegForm()
+    if request.method == "GET":
+        
+        return render_template("register.html", form=form)
+    elif form.validate_on_submit():
+        # process the registration form
+        name = request.form["name"]
+        password = request.form["password"]
+        email = request.form["email"]
+        # For simplicity, we are not storing the user in a database
+        if User.create_user(name=name, email=email, password_hash=password):
+            flash("Registration successful. Please log in.", "success")
+        else:
+            flash("Registration failed. User may already exist.", "danger")
+        return redirect(url_for("login")) #redirect to function login after registration
+    return render_template("register.html", form=form)
+
+
+if __name__ == '__main__':
+    app.run()
