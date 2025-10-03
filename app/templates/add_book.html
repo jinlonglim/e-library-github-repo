@@ -9,124 +9,140 @@
         <form method="POST">
           {{ form.csrf_token }}
           {{ form.hidden_tag() }}
+          <input type="hidden" name="author_count" value="{{ author_count }}">
 
           <div class="row mb-3">
             <label class="col-sm-3 col-form-label"><strong>Choose multiple Genres:</strong></label>
             <div class="col-sm-9">
-              {{ form.genres(class="form-select", size="4", multiple=True) }}
+              {% if form_data %}
+                <select name="genres" class="form-select" size="4" multiple>
+                  {% for genre in ["Animals", "Business", "Comics", "Communication", "Dark Academia", "Emotion", "Fantasy", "Fiction", "Friendship", "Graphic Novels", "Grief", "Historical Fiction", "Indigenous", "Inspirational", "Magic", "Mental Health", "Nonfiction", "Personal Development", "Philosophy", "Picture Books", "Poetry", "Productivity", "Psychology", "Romance", "School", "Self Help"] %}
+                    <option value="{{ genre }}" {% if genre in form_data.getlist('genres') %}selected{% endif %}>
+                      {{ genre }}
+                    </option>
+                  {% endfor %}
+                </select>
+              {% else %}
+                {{ form.genres(class="form-select", size="4", multiple=True) }}
+              {% endif %}
             </div>
           </div>
           
           <div class="row mb-3">
             <label class="col-sm-3 col-form-label"><strong>Title:</strong></label>
             <div class="col-sm-9">
-              {{ form.title(class="form-control") }}
+              {% if form_data %}
+                <input type="text" name="title" class="form-control" value="{{ form_data.get('title', '') }}">
+              {% else %}
+                {{ form.title(class="form-control") }}
+              {% endif %}
             </div>
           </div>
           
           <div class="row mb-3">
             <label class="col-sm-3 col-form-label"><strong>Choose a category:</strong></label>
             <div class="col-sm-9">
-              {{ form.category(class="form-select") }}
+              {% if form_data %}
+                <select name="category" class="form-select">
+                  <option value="">Select a category</option>
+                  {% for category in [("Children", "Children"), ("Teens", "Teens"), ("Adult", "Adult")] %}
+                    <option value="{{ category[0] }}" {% if form_data.get('category') == category[0] %}selected{% endif %}>
+                      {{ category[1] }}
+                    </option>
+                  {% endfor %}
+                </select>
+              {% else %}
+                {{ form.category(class="form-select") }}
+              {% endif %}
             </div>
           </div>
           
           <div class="row mb-2">
             <label class="col-sm-3 col-form-label"><strong>URL for Cover:</strong></label>
             <div class="col-sm-9">
-              {{ form.url(class="form-control") }}
+              {% if form_data %}
+                <input type="text" name="url" class="form-control" value="{{ form_data.get('url', '') }}">
+              {% else %}
+                {{ form.url(class="form-control") }}
+              {% endif %}
             </div>
           </div>
 
-          <div class="row mb-2">
+          <div class="row mb-3">
             <label class="col-sm-3 col-form-label"><strong>Description:</strong></label>
             <div class="col-sm-9">
-              {{ form.description(class="form-control", rows="8") }}
+              {% if form_data %}
+                <textarea name="description" class="form-control" rows="8">{{ form_data.get('description', '') }}</textarea>
+              {% else %}
+                {{ form.description(class="form-control", rows="8") }}
+              {% endif %}
             </div>
           </div>
+
           
+          {% for i in range(1, author_count + 1) %}
           <div class="row mb-2">
-            <label class="col-sm-3 col-form-label"><strong>Author 1: <span class="text-danger">*</span></strong></label>
+            <label class="col-sm-3 col-form-label">
+              <strong>Author {{ i }}:{% if i == 1 %} <span class="text-danger">*</span>{% endif %}</strong>
+            </label>
             <div class="col-sm-9">
               <div class="d-flex align-items-center gap-2">
-                {{ form.author(class="form-control") }}
+                <input type="text" 
+                       name="author_{{ i }}" 
+                       class="form-control" 
+                       value="{{ form_data.get('author_' ~ i, '') if form_data else '' }}"
+                       {% if i == 1 %}required{% endif %}>
                 <div class="form-check">
-                  {{ form.illustrator1(class="form-check-input") }}
-                  <label class="form-check-label" for="illustrator1">Illustrator</label>
+                  <input class="form-check-input" 
+                         type="checkbox" 
+                         name="illustrator_{{ i }}" 
+                         id="illustrator_{{ i }}"
+                         {% if form_data and form_data.get('illustrator_' ~ i) %}checked{% endif %}>
+                  <label class="form-check-label" for="illustrator_{{ i }}">
+                    Illustrator
+                  </label>
                 </div>
               </div>
             </div>
           </div>
-          
-          <div class="row mb-2">
-            <label class="col-sm-3 col-form-label"><strong>Author 2:</strong></label>
-            <div class="col-sm-9">
-              <div class="d-flex align-items-center gap-2">
-                {{ form.author2(class="form-control") }}
-                <div class="form-check">
-                  {{ form.illustrator2(class="form-check-input") }}
-                  <label class="form-check-label" for="illustrator2">Illustrator</label>
-                </div>
-              </div>
+          {% endfor %}
+
+          <div class="row mb-3">
+            <div class="col-sm-9 offset-sm-3">
+              <button type="submit" name="add_author" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add Another Author
+              </button>
+              <small class="text-muted ms-2">Currently {{ author_count }} author field(s)</small>
             </div>
           </div>
-          
-          <div class="row mb-2">
-            <label class="col-sm-3 col-form-label"><strong>Author 3:</strong></label>
-            <div class="col-sm-9">
-              <div class="d-flex align-items-center gap-2">
-                {{ form.author3(class="form-control") }}
-                <div class="form-check">
-                  {{ form.illustrator3(class="form-check-input") }}
-                  <label class="form-check-label" for="illustrator3">Illustrator</label>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="row mb-2">
-            <label class="col-sm-3 col-form-label"><strong>Author 4:</strong></label>
-            <div class="col-sm-9">
-              <div class="d-flex align-items-center gap-2">
-                {{ form.author4(class="form-control") }}
-                <div class="form-check">
-                  {{ form.illustrator4(class="form-check-input") }}
-                  <label class="form-check-label" for="illustrator4">Illustrator</label>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="row mb-2">
-            <label class="col-sm-3 col-form-label"><strong>Author 5:</strong></label>
-            <div class="col-sm-9">
-              <div class="d-flex align-items-center gap-2">
-                {{ form.author5(class="form-control") }}
-                <div class="form-check">
-                  {{ form.illustrator5(class="form-check-input") }}
-                  <label class="form-check-label" for="illustrator5">Illustrator</label>
-                </div>
-              </div>
-            </div>
-          </div>
-          
+
           <div class="row mb-3">
             <label class="col-sm-3 col-form-label"><strong>Number of pages:</strong></label>
             <div class="col-sm-9">
-              {{ form.pages(class="form-control", type="number") }}
+              {% if form_data %}
+                <input type="number" name="pages" class="form-control" value="{{ form_data.get('pages', '') }}">
+              {% else %}
+                {{ form.pages(class="form-control", type="number") }}
+              {% endif %}
             </div>
           </div>
           
           <div class="row mb-3">
             <label class="col-sm-3 col-form-label"><strong>Number of copies:</strong></label>
             <div class="col-sm-9">
-              {{ form.copies(class="form-control", type="number") }}
+              {% if form_data %}
+                <input type="number" name="copies" class="form-control" value="{{ form_data.get('copies', '') }}">
+              {% else %}
+                {{ form.copies(class="form-control", type="number") }}
+              {% endif %}
             </div>
           </div>
           
           <div class="row">
             <div class="col-sm-9 offset-sm-3 text-end">
-              <button type="submit" class="btn btn-success">Submit</button>
+              <button type="submit" name="submit" class="btn btn-success btn-lg">
+                <i class="bi bi-check-circle"></i> Submit Book
+              </button>
             </div>
           </div>
         </form>

@@ -52,10 +52,7 @@ class AddBookForm(FlaskForm):
         'Title',
         validators=[DataRequired(message="Title is required.")]
     )
-    author = StringField(
-        'Author',
-        validators=[DataRequired(message="Author is required.")]
-    )
+    author = StringField('Author') #removed DataRequired to allow form submission
     author2 = StringField('Author 2 (optional)')
     author3 = StringField('Author 3 (optional)')
     author4 = StringField('Author 4 (optional)')
@@ -93,7 +90,11 @@ class AddBookForm(FlaskForm):
         'Copies',
         validators=[DataRequired(message="Copies are required.")]
     )
+    # track number of authors fields filled
+    author_count = IntegerField(default=1)
+    
     submit = SubmitField('Add Book')
+    add_author = SubmitField('Add Another Author')
 
 class Book(db.Document):
     
@@ -257,7 +258,7 @@ class Loan(db.Document):
     @staticmethod
     def get_user_loans(member):
         return Loan.objects(member=member).order_by('-borrow_date')
-
+    
     @staticmethod
     def get_loan_by_id(loan_id):
         return Loan.objects(id=loan_id).first()

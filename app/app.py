@@ -27,7 +27,54 @@ def details(title):
     book = Book.objects(title=title).first()
     return render_template('details.html', book=book)
 
-#add_book route for admin user
+# #add_book route for admin user
+# @app.route('/add_book', methods=['GET', 'POST'])
+# @login_required
+# def add_book():
+#     if current_user.email != 'admin@lib.sg':
+#         flash("Access denied. Admin only.", "danger")
+#         return redirect(url_for('home'))
+    
+#     form = AddBookForm()
+#     if form.validate_on_submit():
+#         #collect authors from the form
+#         authors = []
+        
+#         author1 = form.author.data.strip()
+#         if form.illustrator1.data:
+#             author1 += " (Illustrator)"
+#         authors.append(author1)
+        
+#         # author2-5 are optional
+#         for i in range(2, 6):
+#             author_field = getattr(form, f'author{i}')
+#             illustrator_field = getattr(form, f'illustrator{i}')
+            
+#             if author_field.data and author_field.data.strip():
+#                 author_name = author_field.data.strip()
+#                 # append (Illustrator) if illustrator checkbox is checked
+#                 if illustrator_field.data:
+#                     author_name += " (Illustrator)"
+#                 authors.append(author_name)
+        
+#         book = Book(
+#             title=form.title.data,
+#             authors=authors,
+#             category=form.category.data,
+#             description=[form.description.data],
+#             url=form.url.data,
+#             pages=form.pages.data,
+#             copies=form.copies.data,
+#             available=form.copies.data,
+#             genres=form.genres.data
+#         )
+#         book.save()
+#         flash("Book added successfully!", "success")
+#         #remain on the add_book page after adding a book
+#         return redirect(url_for('add_book'))
+#     return render_template('add_book.html', form=form)
+
+# updated add_book route to handle dynamic authors
 @app.route('/add_book', methods=['GET', 'POST'])
 @login_required
 def add_book():
@@ -36,42 +83,78 @@ def add_book():
         return redirect(url_for('home'))
     
     form = AddBookForm()
-    if form.validate_on_submit():
-        #collect authors from the form
+    
+    # Initialize author count
+    if request.method == 'GET':
+        author_count = 1
+    else:
+        author_count = int(request.form.get('author_count', 1))
+    
+    # Handle "Add Another Author" button
+    if request.method == 'POST' and 'add_author' in request.form:
+        author_count += 1
+        return render_template('add_book.html', form=form, author_count=author_count, form_data=request.form)
+    
+    # Handle form submission
+    if request.method == 'POST' and 'submit' in request.form:
+        print("SUBMIT CLICKED")
+        
+        # Manual validation for dynamic author fields
         authors = []
+        has_error = False
         
-        author1 = form.author.data.strip()
-        if form.illustrator1.data:
-            author1 += " (Illustrator)"
-        authors.append(author1)
-        
-        # author2-5 are optional
-        for i in range(2, 6):
-            author_field = getattr(form, f'author{i}')
-            illustrator_field = getattr(form, f'illustrator{i}')
+        # Collect all authors
+        for i in range(1, author_count + 1):
+            author_name = request.form.get(f'author_{i}', '').strip()
+            is_illustrator = request.form.get(f'illustrator_{i}') == 'on'
             
-            if author_field.data and author_field.data.strip():
-                author_name = author_field.data.strip()
-                if illustrator_field.data:
+            # First author is required
+            if i == 1 and not author_name:
+                flash("Author 1 is required.", "danger")
+                has_error = True
+                break
+            
+            # Add non-empty authors
+            if author_name:
+                if is_illustrator:
                     author_name += " (Illustrator)"
                 authors.append(author_name)
         
-        book = Book(
-            title=form.title.data,
-            authors=authors,
-            category=form.category.data,
-            description=[form.description.data],
-            url=form.url.data,
-            pages=form.pages.data,
-            copies=form.copies.data,
-            available=form.copies.data,
-            genres=form.genres.data
-        )
-        book.save()
-        flash("Book added successfully!", "success")
-        #remain on the add_book page after adding a book
-        return redirect(url_for('add_book'))
-    return render_template('add_book.html', form=form)
+        # Check form validation - THIS MUST BE INDENTED INSIDE THE SUBMIT BLOCK
+        if not form.validate_on_submit():
+            print("FORM VALIDATION FAILED")
+            print(f"FORM ERRORS: {form.errors}")
+            for field, errors in form.errors.items():
+                for error in errors:
+                    flash(f"{field}: {error}", "danger")
+            return render_template('add_book.html', form=form, author_count=author_count, form_data=request.form)
+        
+        # Validate authors
+        if not has_error and not authors:
+            flash("At least one author is required.", "danger")
+            has_error = True
+        
+        if not has_error:
+            print(f"CREATING BOOK WITH AUTHORS: {authors}")
+            book = Book(
+                title=form.title.data,
+                authors=authors,
+                category=form.category.data,
+                description=[form.description.data],
+                url=form.url.data,
+                pages=form.pages.data,
+                copies=form.copies.data,
+                available=form.copies.data,
+                genres=form.genres.data
+            )
+            book.save()
+            flash(f"Book '{book.title}' added successfully with {len(authors)} author(s)!", "success")
+            return redirect(url_for('add_book'))
+        
+        # If there's an error, preserve the form data
+        return render_template('add_book.html', form=form, author_count=author_count, form_data=request.form)
+    
+    return render_template('add_book.html', form=form, author_count=author_count, form_data=None)
 
 #view loans for non-admin user
 @app.route("/make_loan/<title>")
